@@ -2,9 +2,10 @@ from tkinter import *
 import time
 from datetime import *
 
+
 class Clock(object):
 
-	def gui(self):
+	def main(self):
 
 		#Initiate clock
 		self.clock = Tk()
@@ -24,7 +25,7 @@ class Clock(object):
 		self.Expected_time = StringVar()
 		self.Timer = StringVar()
 
-		#Input of time
+		#Input of time; Entry
 		self.set_time_hour = Entry(self.clock, textvariable=self.Hours)
 		self.set_time_hour.place(x= 50, y= 100, height =  50, width = 50)
 		self.set_time_minute = Entry(self.clock, textvariable=self.Minutes)
@@ -52,9 +53,14 @@ class Clock(object):
 
 		#Buttons
 		self.start_timer = Button(self.clock, text='Start Timer', command = self.retrieved_time, width =10)
-		self.start_timer.place(x=200, y = 200)
+		self.start_timer.place(x=200, y = 210)
 		self.stop_timer = Button(self.clock, text='Stop Timer', command= self.reset, width =10)
-		self.stop_timer.place(x = 200, y =250)
+		self.stop_timer.place(x = 200, y =260)
+		self.pause_button = Button(self.clock, text = ' Pause Timer', command =self.pause, width = 10)
+		self.pause_button.place(x= 200, y=160)
+
+		self.pause_button.config(state='disabled')
+		self.stop_timer.config(state='disabled')
 
 		#Main loop
 		self.clock.update()
@@ -71,6 +77,12 @@ class Clock(object):
 			if self.set_hour or self.set_minute or self.set_second > 0:
 				#Disable button
 				self.start_timer.config(state='disabled')
+				self.pause_button.config(state='normal')
+				self.stop_timer.config(state='normal')
+
+				self.set_time_hour.config(state='disabled')
+				self.set_time_minute.config(state='disabled')
+				self.set_time_sec.config(state='disabled')
 				
 				self.time_computation(self.set_hour, self.set_minute, self.set_second)
 
@@ -109,7 +121,7 @@ class Clock(object):
 		self.counter = self.clock.after(1000,self.countdown)
 		self.Timer.set(self.set_timer)
 		
-		#Condition if the timer is met with 0
+        #Condition if the timer is met with 0; timer undergoes reset
 		if self.set_timer == timedelta(hours=0,minutes=0,seconds=0):
 			self.reset()
 			self.pop_up()
@@ -127,6 +139,13 @@ class Clock(object):
 
 		#Reset button state
 		self.start_timer.config(state="normal")
+		self.pause_button.config(state="disabled")
+
+		#Reset Entry
+		self.set_time_hour.config(state="normal")
+		self.set_time_minute.config(state="normal")
+		self.set_time_sec.config(state="normal")
+
 
 	def pop_up(self):
 		#New window
@@ -137,7 +156,6 @@ class Clock(object):
 		#Disable interaction of the lower window
 		self.alarm_window.grab_set()
 
-
 		self.icon_alarm = PhotoImage(file='images/clock.png')
 		self.alarm_window.iconphoto(False,self.icon_alarm)
 
@@ -146,8 +164,28 @@ class Clock(object):
 
 		self.close_button = Button(self.alarm_window, text='Close', command = self.alarm_window.destroy,width=20)
 		self.close_button.place(x=30, y = 80)
+		
+	def pause(self):
+		
+		self.clock.after_cancel(self.counter)
+		
+		self.string = str(self.set_timer)
+		self.split_string = self.string.split(":")
+		
+		self.paused_hour = self.split_string[0]
+		self.paused_minute = self.split_string[1]
+		self.paused_second = self.split_string[2]
+
+		self.Hours.set(int(self.paused_hour))
+		self.Minutes.set(int(self.paused_minute))
+		self.Seconds.set(int(self.paused_second))
+		self.Timer.set('')
+		self.Expected_time.set('')
+
+		self.start_timer.config(state="normal")
+		self.pause_button.config(state="disabled") #This is to prevent getting NULL
 
 
 if __name__ == "__main__": 
 	start = Clock()
-	start.gui()
+	start.main()
